@@ -28,7 +28,7 @@ NopassForUser.prototype.toString = function(){
 }
 
 //---Bloque del Constructor Usuario
-
+/*
 var IdUsuario = (function ()
 //Generador de indces unicos para los objetos Usuario
 {
@@ -37,15 +37,16 @@ var IdUsuario = (function ()
     return ++IdUsuario;
   })
 })();
+*/
 
-function User(nombre,pass){
+function User(IdUsuario, nombre,pass){
   //Comprobacion de creacion de instancia del objeto user
   if(!(this instanceof (User))) throw new ConstructorCalledFunction();
 
   if(!nombre)throw new NoNameForUser();
   if(!pass)throw new NopassForUser();
   
-  var _IdUsuario = IdUsuario();
+  var _IdUsuario = IdUsuario;
   var _nombre = nombre;
   var _pass = pass;
 

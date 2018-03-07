@@ -5,11 +5,11 @@
 function init()
 /*Funcion que inicaliza todo el ERP, las tiendas que lo componen asi como los productos y las categorias*/
 {
-  //Implementacion de los Objetos Categoria
-  var cat0 = new Category("General","Productos");
-  var cat1 = new Category("Comunicacion","Telefonos moviles, Fijos, radios de onda corta, radios de onda larga y todo tipo de equipos relacionados con la comunicacion.");
-  var cat2 = new Category("Imagen","Equipos fotograficos, grabacion de Video y todo tipo de equipos relacionados con la Imagen.");
-  var cat3 = new Category("VideoConsolas","Videoconsolas fijas o portatiles, mandos y complementos.");
+  //Instanciacion de los Objetos Categoria
+  var cat0 = new Category(0,"General","Productos");
+  var cat1 = new Category(1,"Comunicacion","Telefonos moviles, Fijos, radios de onda corta, radios de onda larga y todo tipo de equipos relacionados con la comunicacion.");
+  var cat2 = new Category(2,"Imagen","Equipos fotograficos, grabacion de Video y todo tipo de equipos relacionados con la Imagen.");
+  var cat3 = new Category(3,"VideoConsolas","Videoconsolas fijas o portatiles, mandos y complementos.");
   
   /*
   console.log(cat1.toString());
@@ -17,7 +17,7 @@ function init()
   console.log(cat3.toString());
   */
 
-  //Implementacion de los Objetos Producto
+  //Instanciacion de los Objetos Producto
 
   var pro1 = new Movil("0001Apple","Iphone X","La ultima version de movil de la conocida marca de la manzana...",24,849.99,"../imagenes/iphoneX.jpg","Apple","50Mpx","120Gb");
   var pro2 = new Movil("0001Samsumg","Galaxy S8","El ultimo movil de la competencia de la manzana",24,799.99,"../imagenes/gs8.jpg","Samsumg","50Mpx","120Gb");
@@ -38,7 +38,7 @@ function init()
   console.log(pro6.toString());
   */
 
-  //Implementacion de los Objetos Coords
+  //Instanciacion de los Objetos Coords
 
   var cor1 = new Coords(1,1);
   var cor2 = new Coords(2,2);
@@ -51,10 +51,10 @@ function init()
   console.log(cor3.toString());
   */
 
-  //Implementacion de los Objetos Shop
+  //Instanciacion de los Objetos Shop
 
   var shop1 = new Shop("134568","Moviles Benito","Plaza Mayor Nº2, Chillon","926202020",cor2);
-  var shop2 = new Shop("134569","Camaras Pancracio","C/El Azogue Nº1, Almaden","926212121",cor1);
+  var shop2 = new Shop("134569","Camaras Pancracio","C/El Azogue Nº1, Almaden","926212121",new Coords(1,1));
   var shop3 = new Shop("789469","Electro Barato","C/Calatrava Nº86, Ciudad Real","926245056",cor3);
 
   /*
@@ -145,8 +145,8 @@ function init()
   Store.AddShop(shop3);
 
   //Creamos las instancias de usuario
-  var user1 = new User("prueba","prueba");//instancia de prueba de un usuario
-  var user2 = new User("Jaime","123456789");//instancia de prueba de un segundo usuario
+  var user1 = new User(1,"prueba","prueba");//instancia de prueba de un usuario
+  var user2 = new User(2,"Jaime","123456789");//instancia de prueba de un segundo usuario
 
   //Añadimos los usuarios al storeHouse
   Store.AddUser(user1);
