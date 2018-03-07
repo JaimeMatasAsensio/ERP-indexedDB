@@ -83,3 +83,7 @@ const coord = [
   {longitud: 3, latitud:3},
 ];
 
+const users = [
+  {nombre: "prueba", pass: "prueba"},
+  {nombre: "Jaime", pass: "123456789"}
+];
