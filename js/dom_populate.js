@@ -350,7 +350,7 @@ function menuCategoryShopPopulate(shop)
   var catIte = shop.categoryIte;
   var category = catIte.next();
   while(!category.done){
-    if(category.value.IdCategory != "0"){//La categoria general no aparece en la lista
+    if(category.value.IdCategory !== 0){//La categoria general no debe aparece en la lista
       var liCategory = document.createElement("li");
       liCategory.className = "list-group-item";
       liCategory.appendChild(document.createTextNode(category.value.titulo));

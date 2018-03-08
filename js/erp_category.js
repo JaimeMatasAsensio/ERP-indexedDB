@@ -31,23 +31,23 @@ InvalidDescriptionValue.prototype.toString = function(){
 //--- Bloque del Constructor Category
 /*
 var IdCategory = (function (){
-  var IdCategory = -1;
+  var IdCategory = 3;
   return (function (){
     return ++IdCategory;
   })
 })();//Generador de indces unicos para los Objectos Category
 */
 
-function Category(IdCategory, titulo, descripcion){
+function Category(Id, titulo, descripcion){
   //Comprobacion de creacion de instancia
   if(!(this instanceof Category)) throw new ConstructorCalledFunction();
 
   //Validacion de inputs
   if(!titulo) throw new InvalidTitleValue();
   if(!descripcion) throw new InvalidDescriptionValue(descripcion);
-
+  
   //Parmetros privados
-  var _IdCategory = IdCategory;
+  var _IdCategory = Id
   var _titulo = titulo;
   var _descripcion = descripcion;
 

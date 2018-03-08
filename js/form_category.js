@@ -86,9 +86,15 @@ function checkAddCategory()
   //Comprobamos que sean correctos
   try{
     if(!addTo) throw new UnknownAddToNewCategory();
-
+    var IdCategory = (function (){
+      var IdCategory = 3;
+      return (function (){
+        return ++IdCategory;
+      })
+    })();
     //Creamos el objeto para la nueva categoria
-    var obj = new Category(titulo, descripcion);
+    var Id = IdCategory();
+    var obj = new Category(Id,titulo, descripcion);
 
     //Lo añadimos a su destino
     if(addTo != "store"){
@@ -475,7 +481,6 @@ function checkRemoveCategory()
       WriteSuccessModal("Categoria Eliminada con exito!","La categoria "+ catTitleTarget + "Ha sido eliminada de todo el Store House "+Store.nombre);
       loadFormRemoveCategory();
     }else{
-      console.log(destino + " ; " + catTarget);
       var removeShop = Store.setCategoryProductInShop(destino,catTarget,0);
       while(removeShop == true){
         removeShop = Store.setCategoryProductInShop(destino,catTarget,0);
@@ -495,14 +500,14 @@ function checkModCategory()
 /*Funcion que toma los valores del formulario y modifica la categoria seleccionada*/
 {
   clearModal();
-  console.log("Listo para probar los valores del formulario!"); 
   var destino = FormCategory.elements.namedItem("updateTarget").value;
   var catTarget = FormCategory.elements.namedItem("idCategoria").value;
   var modTitulo = FormCategory.elements.namedItem("tituloCategoria").value;
   var modDesc = FormCategory.elements.namedItem("descrCategoria").value;
   
   try {
-    var modCat = new Category(modTitulo,modDesc);
+    var Id;
+    var modCat = new Category(catTarget,modTitulo,modDesc);
     if(destino != "store"){
       var oldCat = Store.getCategoryFromShop(destino,catTarget);
       var shop = Store.getShopByCif(destino);
