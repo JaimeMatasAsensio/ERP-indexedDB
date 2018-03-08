@@ -1,6 +1,6 @@
 "use strict";
 /*Documento para crear las distintas funciones que cargaran datos desde Store */
-init();
+initDB();
 
 var Store = StoreHouse.getInstance();
 var IdMainCont = document.getElementById("main-cont");

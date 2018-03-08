@@ -109,12 +109,12 @@ function init()
   console.log("");
   console.log("Nombre del Store House: "+Store.nombre);
   */
-
+/*
   Store.AddCategory(cat0);
   Store.AddCategory(cat1);
   Store.AddCategory(cat2);
   Store.AddCategory(cat3);
-
+*/
   /*//Iterador de categorias almacenadas en Store
   var iteStoreCat = Store.categoryIte;
   var item = iteStoreCat.next();
@@ -123,13 +123,14 @@ function init()
     item = iteStoreCat.next();
   }
   */
+  
   Store.AddProduct(pro1,10,1);
   Store.AddProduct(pro2,5,1);
   Store.AddProduct(pro3,6,2);
   Store.AddProduct(pro4,3,2);
   Store.AddProduct(pro5,3,3);
   Store.AddProduct(pro6,8,3);
-
+  
   /*//Iterador de productos almacenados en StoreHouse con su categoria
   var itemStore = Store.stockIte;
   var item = itemStore.next();

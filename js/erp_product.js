@@ -55,6 +55,7 @@ InvalidValueForIVA.prototype.toString = function(){
 //--- Bloque del constructor product y los objetos que heredan de el
 
 //-- Objecto Abstracto Product
+
 (function (){
   var Lock = false;// Seguro para no instanciar la clase abstracta
 

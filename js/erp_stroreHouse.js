@@ -315,22 +315,18 @@ var StoreHouse = (function(){
           });
           if(catId != -1){
             //Buscamos si el elemento ya esta en nuestro stock
-            var i = 0;
-            var addedCant = false;
-            while (i < _stock.length && !addedCant) {
-              if(_stock[i].producto.IdProduct === obj.IdProduct){// si el elemento esta solo añadira la cantidad que le pasemos
-                _stock[i].cantidad += cant;
-                addedCant = true;
-              }
-              i++;
-            }
+            var index = _stock.findIndex(function(element){
+              return (element.producto.IdProduct == obj.IdProduct)
+            });
 
-            if(!addedCant){//si no se encontro el elemento, quiere decir que no esta en nuestro Stock, lo añadiremos como nuevo elemento
+            if(index = -1){//si no se encontro el elemento, quiere decir que no esta en nuestro Stock, lo añadiremos como nuevo elemento
               _stock.push({
                 producto: obj,
                 cantidad: cant,
                 categoriaId: Idcat
               });
+            }else{
+              _stock[index].cantidad += cant 
             }
             return _stock.length; // devolvemos el numero de elementos en _stock
           }else{

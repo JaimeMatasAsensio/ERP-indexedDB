@@ -1,5 +1,6 @@
 "use strict";
 /*Documento que almacena las constantes utilizadas en el documento IndDB_init.js*/
+/*Estas constantes son los valores iniciales del StoreHouse y apartir de los cuales se inicia la practica 8 */
 const db_name = "Store";
 
 const categorias = [
@@ -186,7 +187,7 @@ const shops = [
               marca: "Sony",
               numJugadores: "6 Jugadores",
               portatil: "No",
-              tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 2},
+              tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 3},
             {producto:  {sn:"0001Nintendo", 
               nombre: "Nintendo 3DS 3D", 
               descripcion: "Video consola portatil para los que les gusta jugar en cualquier momento",
@@ -196,7 +197,7 @@ const shops = [
               marca: "Nintendo",
               numJugadores: "1 Jugador",
               portatil: "Si",
-              tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 2}
+              tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 3}
           ],
     coords:{longitud: 2, latitud: 2}
 }];
@@ -231,7 +232,7 @@ const shops = [
                 marca: "Sony",
                 numJugadores: "6 Jugadores",
                 portatil: "No",
-                tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 2},
+                tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 3},
               {producto:  {sn:"0001Nintendo", 
                 nombre: "Nintendo 3DS 3D", 
                 descripcion: "Video consola portatil para los que les gusta jugar en cualquier momento",
@@ -241,5 +242,5 @@ const shops = [
                 marca: "Nintendo",
                 numJugadores: "1 Jugador",
                 portatil: "Si",
-                tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 2}
+                tProducto: "VideoConsola"}, cantidad: 4, IdCategory: 3}
 ];
