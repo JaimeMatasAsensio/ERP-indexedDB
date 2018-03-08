@@ -1,6 +1,7 @@
 "use strict";
 /*Documento para crear las distintas funciones que cargaran datos desde Store */
 initDB();
+//init();
 
 var Store = StoreHouse.getInstance();
 var IdMainCont = document.getElementById("main-cont");
@@ -651,5 +652,8 @@ function clearMainCont()
   }
 }
 
-initPopulate();
+window.setTimeout(function(){
+  initPopulate();
+},100);
+
 

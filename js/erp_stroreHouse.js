@@ -316,7 +316,7 @@ var StoreHouse = (function(){
           if(catId != -1){
             //Buscamos si el elemento ya esta en nuestro stock
             var index = _stock.findIndex(function(element){
-              return (element.producto.IdProduct == obj.IdProduct)
+              return (element.producto.SN == obj.SN)
             });
 
             if(index = -1){//si no se encontro el elemento, quiere decir que no esta en nuestro Stock, lo añadiremos como nuevo elemento
