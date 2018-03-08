@@ -654,6 +654,7 @@ function clearMainCont()
 
 window.setTimeout(function(){
   initPopulate();
+  window.clearTimeout();
 },100);
 
 
