@@ -6,7 +6,6 @@ initDB();
 var Store = StoreHouse.getInstance();
 var IdMainCont = document.getElementById("main-cont");
 var divShopsMenu = document.getElementById("ShopsMenu");
-divShopsMenu.appendChild(menuShopPopulate());
 var divCloseWindow = document.getElementById("closeWindow");
 divCloseWindow.appendChild(btnCloseWindows());
 
@@ -654,7 +653,8 @@ function clearMainCont()
 
 window.setTimeout(function(){
   initPopulate();
+  divShopsMenu.appendChild(menuShopPopulate());
   window.clearTimeout();
-},100);
+},200);
 
 

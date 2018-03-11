@@ -95,13 +95,40 @@ function checkAddCategory()
     //Creamos el objeto para la nueva categoria
     var Id = IdCategory();
     var obj = new Category(Id,titulo, descripcion);
+    var indObj = {IdCategory: Id ,titulo: titulo, descripcion: descripcion};
+    var db;
+    var db_name = "ManchaStore";
+    var request = indexedDB.open(db_name,1);
 
     //Lo añadimos a su destino
     if(addTo != "store"){
-    Store.AddCategoryInShop(addTo,obj);
-    var shop = Store.getShopByCif(addTo);
+      Store.AddCategoryInShop(addTo,obj);
+      var shop = Store.getShopByCif(addTo);
+      request.onsuccess = function(event){
+        db = event.target.result;
+
+        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");
+        var requestTarget = almacenShop.get(addTo);
+
+        requestTarget.onsuccess = function(event){
+          var shop = requestTarget.result;
+          shop.category.push(indObj);
+
+          var requestAdd = almacenShop.put(shop);
+          requestAdd.onsuccess = function(event){
+            console.log("Nueva categoria añadida");
+          }
+        }
+        
+        };
       WriteSuccessModal("Nueva Categoria Añadida!","La categoria "+titulo+"ha sido añadida a la tienda " + shop.nombre )
     }else{
+      request.onsuccess = function(event){
+      db = event.target.result;
+      var almacenCategorias = db.transaction(["categorias"],"readwrite").objectStore("categorias");
+      almacenCategorias.add(indObj);
+      
+      };
       Store.AddCategory(obj);
       WriteSuccessModal("Nueva Categoria Añadida!","La categoria "+titulo+" ha sido añadida al store House");
     }
@@ -459,10 +486,42 @@ function checkRemoveCategory()
   var destino = FormCategory.elements.namedItem("removeTarget").value;
   var catTarget = FormCategory.elements.namedItem("idCategoria").value;
   var catTitleTarget = FormCategory.elements.namedItem("tituloCategoria").value;
-  
+  var db;
+  var db_name = "ManchaStore";
+  var request = indexedDB.open(db_name,1);
   try {
     if(destino == "store"){
-      console.log(destino + " ; " + catTarget);
+      request.onsuccess = function(event){
+        db = event.target.result;
+        var requestDeleteOnStoreHouse = db.transaction(["categorias"],"readwrite").objectStore("categorias").delete(Number(catTarget));
+
+        requestDeleteOnStoreHouse.onsuccess = function(event){
+          console.log("Categoria eliminada del storeHouse...");
+        }
+
+        var requestDeleteOnShops = db.transaction(["shops"],"readwrite").objectStore("shops");
+        requestDeleteOnShops.openCursor().onsuccess = function(event){
+          var cursor = event.target.result;
+          if(cursor){
+            var shop = cursor.value;
+            var index = shop.category.findIndex(function(element){
+              return element.IdCategory == Number(catTarget);
+            });
+            if(index != -1){
+              shop.category.splice(index,1);
+            }
+            shop.stock.forEach(function(element){
+              if(element.IdCategory == Number(catTarget)) element.IdCategory = 0;
+            });
+            requestDeleteOnShops.put(shop);
+          }else{
+            console.log("categoria eliminada de las tiendas...")
+          }
+        }
+
+      };
+
+
       var removed = Store.setCategoryProduct(catTarget,0);
       while(removed == true){
         removed = Store.setCategoryProduct(catTarget,0);
@@ -481,6 +540,34 @@ function checkRemoveCategory()
       WriteSuccessModal("Categoria Eliminada con exito!","La categoria "+ catTitleTarget + "Ha sido eliminada de todo el Store House "+Store.nombre);
       loadFormRemoveCategory();
     }else{
+
+      request.onsuccess = function (event){
+        db = event.target.result;
+        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");
+        var requestDeleteOnShop = almacenShop.get(destino);
+
+        requestDeleteOnShop.onsuccess = function(event){
+          var shop = requestDeleteOnShop.result;
+          var index = shop.category.findIndex(function(element){
+            return element.IdCategory == Number(catTarget);
+          });
+          if(index != -1){
+            shop.category.splice(index,1);
+          }
+          shop.stock.forEach(function(element){
+            if(element.IdCategory == Number(catTarget)) element.IdCategory = 0;
+          });
+          almacenShop.put(shop);
+
+          var requestAdd = almacenShop.put(shop);
+          requestAdd.onsuccess = function(event){
+            console.log("categoria Eliminada de  la tienda");
+          }
+
+        }
+    };
+
+
       var removeShop = Store.setCategoryProductInShop(destino,catTarget,0);
       while(removeShop == true){
         removeShop = Store.setCategoryProductInShop(destino,catTarget,0);
@@ -504,19 +591,65 @@ function checkModCategory()
   var catTarget = FormCategory.elements.namedItem("idCategoria").value;
   var modTitulo = FormCategory.elements.namedItem("tituloCategoria").value;
   var modDesc = FormCategory.elements.namedItem("descrCategoria").value;
-  
+  var db;
+  var db_name = "ManchaStore";
+  var request = indexedDB.open(db_name,1);
   try {
     var Id;
     var modCat = new Category(catTarget,modTitulo,modDesc);
     if(destino != "store"){
       var oldCat = Store.getCategoryFromShop(destino,catTarget);
       var shop = Store.getShopByCif(destino);
+
+      request.onsuccess = function (event){
+        db = event.target.result;
+        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");
+        var requestTarget = almacenShop.get(destino);
+
+        requestTarget.onsuccess = function(event){
+          var shop = requestTarget.result;
+          var index = shop.category.findIndex(function(element){
+            return element.IdCategory == Number(catTarget);
+          });
+          if(index != -1){
+            shop.category[index].Idcategory = Number(catTarget);
+            shop.category[index].titulo = modTitulo;
+            shop.category[index].descripcion = modDesc;
+            var requestAdd = almacenShop.put(shop);
+            requestAdd.onsuccess = function(event){
+              console.log("Categoria modificada añadida en tienda!");
+            }
+          }else{
+            console.log("Categoria no encontrada en tienda!");
+          }
+        };
+      };
+
       var aux = "La categoria " + oldCat.titulo +" ha sido modificada con exito en "+shop.nombre+"."; 
       Store.setCategoryInShop(destino,catTarget,modCat);
       WriteSuccessModal("Categoria Modificada con Exito!",aux);
       loadFormUpdateCategory();
     }else{
       var oldCat = Store.getCategory(catTarget);
+
+      request.onsuccess = function(event){
+        db = event.target.result;
+        var almacenCategorias = db.transaction(["categorias"],"readwrite").objectStore("categorias");
+        var requestTarget = almacenCategorias.get(Number(catTarget));
+
+        requestTarget.onsuccess = function(event){
+          var modCat = requestTarget.result;
+          modCat.IdCategory = Number(catTarget);
+          modCat.titulo = modTitulo;
+          modCat.descripcion = modDesc;
+          var requestMod = almacenCategorias.put(modCat);
+
+          requestMod.onsuccess = function(event){
+            console.log("Categoria modificada en StoreHouse!");
+          }
+        };
+        
+        };
       var aux = "La categoria " + oldCat.titulo +" ha sido modificada con exito en "+Store.nombre+"."; 
       Store.setCategory(catTarget,modCat);
       WriteSuccessModal("Categoria Modificada con Exito!",aux);
