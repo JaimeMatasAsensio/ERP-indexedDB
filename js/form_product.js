@@ -337,21 +337,21 @@ function generateFormModifyProd(field)
         field.appendChild(GenerateInputText("marca","Marca",stock.producto.marca));
         field.appendChild(GenerateInputText("cpu","Procesador",stock.producto.cpu));
         field.appendChild(GenerateInputText("memoria","Memoria",stock.producto.memoria));
-        field.appendChild(GenerateInputHidden("tProducto","movil"));
+        field.appendChild(GenerateInputHidden("tProducto","ordenador"));
       }
       
       if(stock.producto instanceof VideoConsola){
         field.appendChild(GenerateInputText("marca","Marca",stock.producto.marca));
-        field.appendChild(GenerateInputText("numJugadores","Numero de Jugadores",stock.producto.NumJugadores));
+        field.appendChild(GenerateInputText("numJugadores","Numero de Jugadores",stock.producto.numJugadores));
         field.appendChild(GenerateInputText("portatil","Portatil",stock.producto.portatil));
-        field.appendChild(GenerateInputHidden("tProducto","movil"));
+        field.appendChild(GenerateInputHidden("tProducto","consola"));
       }
       
       if(stock.producto instanceof Camara){
         field.appendChild(GenerateInputText("marca","Marca",stock.producto.marca));
         field.appendChild(GenerateInputText("lente","Lente",stock.producto.lente));
         field.appendChild(GenerateInputText("memoria","Memoria",stock.producto.memoria));
-        field.appendChild(GenerateInputHidden("tProducto","movil"));
+        field.appendChild(GenerateInputHidden("tProducto","camara"));
       }
   
       field.appendChild(GenerateInputNumber("cantidad","Cantidad",stock.cantidad));
@@ -526,7 +526,7 @@ function checkModProduct()
   var cantidad = FormProduct.elements.namedItem("cantidad").value;
   cantidad = Number(cantidad);
 
-  try {
+  //try {
     
     var target = FormProduct.elements.namedItem("ModIn").value;
     
@@ -713,7 +713,7 @@ function checkModProduct()
               case "Camara":
               shop.stock[i].producto.marca = FormProduct.elements.namedItem("marca").value;
               shop.stock[i].producto.lente = FormProduct.elements.namedItem("lente").value;
-              shop.stock[i].producto.memoria = FormProduct.elements.namedItem("marca").value;
+              shop.stock[i].producto.memoria = FormProduct.elements.namedItem("memoria").value;
                 break;
   
             }
@@ -734,9 +734,9 @@ function checkModProduct()
     }
     
   
-  } catch (e) {
-    WriteErrorModal(e.message);
-  }
+  //} catch (e) {
+  //  WriteErrorModal(e.message);
+  //}
 }
 
 
