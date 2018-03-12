@@ -265,7 +265,6 @@ function generateFormModifyProd(field)
   return function(){
     var targetShop = FormProduct.elements.namedItem("ModIn").value;
     var targetPro = FormProduct.elements.namedItem("targetPro").value;
-    targetPro = Number(targetPro);
     
     var inputs = field.children;
     if(inputs.length > 2){
@@ -378,34 +377,74 @@ function checkAddProduct()
   var producto = null;
 
   var tProduct = FormProduct.elements.namedItem("tProduct").value;
+
+  var indObj = {};
+
   try {
     switch (tProduct) {
       case "movil":
 
         producto = new Movil(sn,nombre,descripcion,iva,precio,imgPath,FormProduct.elements.namedItem("marca").value,FormProduct.elements.namedItem("camara").value,FormProduct.elements.namedItem("memoria").value);
 
+        indObj = { sn: sn,
+          nombre:nombre,
+          descripcion: descripcion,
+          iva: iva,
+          precio: precio,
+          imagenes: ingPath,
+          marca: FormProduct.elements.namedItem("marca").value,
+          camara: FormProduct.elements.namedItem("camara").value,
+          memoria: FormProduct.elements.namedItem("memoria").value,
+          tProducto: "Movil"
+        }
         break;
     
       case "ordenador":
         
         producto = new Ordenador(sn,nombre,descripcion,iva,precio,imgPath,FormProduct.elements.namedItem("marca").value,FormProduct.elements.namedItem("cpu").value,FormProduct.elements.namedItem("memoria").value);
-
+        indObj = { sn: sn,
+          nombre:nombre,
+          descripcion: descripcion,
+          iva: iva,
+          precio: precio,
+          imagenes: imgPath,
+          marca: FormProduct.elements.namedItem("marca").value,
+          cpu: FormProduct.elements.namedItem("cpu").value,
+          memoria: FormProduct.elements.namedItem("memoria").value,
+          tProducto: "Ordenador"
+        }
         break;
     
       case "consola":
       
-        producto = new Movil(sn,nombre,descripcion,iva,precio,imgPath,FormProduct.elements.namedItem("marca").value,FormProduct.elements.namedItem("NumJugadores").value,FormProduct.elements.namedItem("portatil").value);
-      
+        producto = new VideoConsola(sn,nombre,descripcion,iva,precio,imgPath,FormProduct.elements.namedItem("marca").value,FormProduct.elements.namedItem("numJugadores").value,FormProduct.elements.namedItem("portatil").value);
+        indObj = { sn: sn,
+          nombre:nombre,
+          descripcion: descripcion,
+          iva: iva,
+          precio: precio,
+          imagenes: imgPath,
+          marca: FormProduct.elements.namedItem("marca").value,
+          camara: FormProduct.elements.namedItem("numJugadores").value,
+          memoria: FormProduct.elements.namedItem("portatil").value,
+          tProducto: "VideoConsola"
+        }
         break;
     
       case "camara":
       
-        producto = new Movil(sn,nombre,descripcion,iva,precio,imgPath,FormProduct.elements.namedItem("marca").value,FormProduct.elements.namedItem("lente").value,FormProduct.elements.namedItem("memoria").value);
-      
-        break;
-    
-      default:
-
+        producto = new Camara(sn,nombre,descripcion,iva,precio,imgPath,FormProduct.elements.namedItem("marca").value,FormProduct.elements.namedItem("lente").value,FormProduct.elements.namedItem("memoria").value);
+        indObj = { sn: sn,
+          nombre:nombre,
+          descripcion: descripcion,
+          iva: iva,
+          precio: precio,
+          imagenes: imgPath,
+          marca: FormProduct.elements.namedItem("marca").value,
+          camara: FormProduct.elements.namedItem("lente").value,
+          memoria: FormProduct.elements.namedItem("memoria").value,
+          tProducto: "Camara"
+        }
         break;
     }
 
@@ -418,9 +457,52 @@ function checkAddProduct()
     var target = FormProduct.elements.namedItem("addTo").value;
 
     if(target == "store"){
+
+      var db;
+      var db_name = "ManchaStore";
+      var request = indexedDB.open(db_name,1);
+
+      request.onsuccess = function(event){
+        db = event.target.result;
+
+        var stockStore = db.transaction(["stock"], "readwrite").objectStore("stock");
+        stockStore.add({
+          producto: indObj,
+          cantidad: cantidad,
+          IdCategory: Number(categoria) 
+        });
+
+      };
+
       Store.AddProduct(producto,cantidad,categoria);
       WriteSuccessModal("Nuevo Producto añadido","Se ha añadido un nuevo producto a " + Store.nombre);
     }else{
+      var db;
+      var db_name = "ManchaStore";
+      var request = indexedDB.open(db_name,1);
+
+      request.onsuccess = function(event){
+        db = event.target.result;
+
+        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops");
+        var requestTarget = almacenShops.get(target);
+
+        requestTarget.onsuccess = function (event){
+          var shop = requestTarget.result;
+          shop.stock.push({
+            producto: indObj,
+            cantidad: cantidad,
+            IdCategory: Number(categoria)
+          })
+
+          var requestAdd = almacenShops.put(shop);
+          requestAdd.onsuccess = function (event){
+            console.log("Nuevo Producto añadido a tienda");
+          };
+        };
+
+      };
+
       Store.AddProductInShop(target,producto,cantidad,categoria);
       var shop = Store.getShopByCif(target);
       WriteSuccessModal("Nuevo Producto añadido","Se ha añadido un nuevo producto en la tienda " + shop.nombre);
@@ -438,7 +520,7 @@ function checkAddProduct()
 function checkModProduct()
 /*Funcion que modifica una categoria en el storehouse o en una de las tiendas */
 {
-  var targetPro = FormProduct.elements.namedItem("idPro").value;
+  var targetPro = FormProduct.elements.namedItem("sn").value;
   var nombre = FormProduct.elements.namedItem("nombre").value;
   var descripcion = FormProduct.elements.namedItem("desc").value;
   var iva = FormProduct.elements.namedItem("iva").value;
@@ -462,13 +544,18 @@ function checkModProduct()
       stock.producto.precio = precio;
       stock.producto.imagenes = imagenes;
       stock.cantidad = cantidad;
+      var indObj = {};
+
+      var db;
+      var db_name = "ManchaStore";
+      var request = indexedDB.open(db_name,1);
       switch (tProduct) {
         case "movil":
   
           stock.producto.marca = FormProduct.elements.namedItem("marca").value;
           stock.producto.camara = FormProduct.elements.namedItem("camara").value;
           stock.producto.memoria = FormProduct.elements.namedItem("memoria").value;
-  
+          
           break;
       
         case "ordenador":
@@ -484,20 +571,66 @@ function checkModProduct()
           stock.producto.marca = FormProduct.elements.namedItem("marca").value;
           stock.producto.numJugadores = FormProduct.elements.namedItem("numJugadores").value;
           stock.producto.portatil = FormProduct.elements.namedItem("portatil").value;
-          
           break;
       
         case "camara":
           stock.producto.marca = FormProduct.elements.namedItem("marca").value;
           stock.producto.lente = FormProduct.elements.namedItem("lente").value;
           stock.producto.memoria = FormProduct.elements.namedItem("memoria").value;
-        
-          break;
-      
-        default:
-  
           break;
       }    
+      request.onsuccess = function(event){
+        db = event.target.result;
+
+        var almacenStock = db.transaction(["stock"],"readwrite").objectStore("stock");
+        var requestTarget = almacenStock.get(targetPro);
+
+        requestTarget.onsuccess = function(event){
+          var prod = requestTarget.result;
+          console.log(prod)
+          prod.producto.nombre = nombre;
+          prod.producto.descripcion = descripcion;
+          prod.producto.iva = iva; 
+          prod.producto.precio = precio;
+          prod.producto.imagenes = imagenes;
+          prod.producto.tProducto = tProduct;
+          prod.cantidad = cantidad;
+          switch (prod.producto.tProdcuto) {
+            case "Movil":
+              prod.producto.marca = FormProduct.elements.namedItem("marca").value;
+              prod.producto.camara = FormProduct.elements.namedItem("camara").value;
+              prod.producto.memoria = FormProduct.elements.namedItem("marca").value;
+              break;
+          
+            case "Ordenador":
+              prod.producto.marca = FormProduct.elements.namedItem("marca").value;
+              prod.producto.cpu = FormProduct.elements.namedItem("cpu").value;
+              prod.producto.memoria = FormProduct.elements.namedItem("marca").value;
+              break;
+          
+            case "VideoConsola":
+              prod.producto.marca = FormProduct.elements.namedItem("marca").value;
+              prod.producto.numJugadores = FormProduct.elements.namedItem("numJugadores").value;
+              prod.producto.portatil = FormProduct.elements.namedItem("portatil").value;
+              break;
+          
+            case "Camara":
+              prod.producto.marca = FormProduct.elements.namedItem("marca").value;
+              prod.producto.lente = FormProduct.elements.namedItem("lente").value;
+              prod.producto.memoria = FormProduct.elements.namedItem("marca").value;
+              break;
+
+          }
+
+          var requestMod = almacenStock.put(prod);
+          requestMod.onsuccess = function(event){
+            console.log("Producto modificado en el StoreHouse");
+          };
+
+        };
+      };
+
+
 
       WriteSuccessModal("Producto Modificado","Se ha modificado un nuevo producto a " + Store.nombre);
     }else{
@@ -509,13 +642,16 @@ function checkModProduct()
       stock.producto.precio = precio;
       stock.producto.imagenes = imagenes;
       stock.cantidad = cantidad;
+      var db;
+      var db_name = "ManchaStore";
+      var request = indexedDB.open(db_name,1);
       switch (tProduct) {
         case "movil":
   
           stock.producto.marca = FormProduct.elements.namedItem("marca").value;
           stock.producto.camara = FormProduct.elements.namedItem("camara").value;
           stock.producto.memoria = FormProduct.elements.namedItem("memoria").value;
-  
+          
           break;
       
         case "ordenador":
@@ -529,20 +665,75 @@ function checkModProduct()
           stock.producto.marca = FormProduct.elements.namedItem("marca").value;
           stock.producto.numJugadores = FormProduct.elements.namedItem("numJugadores").value;
           stock.producto.portatil = FormProduct.elements.namedItem("portatil").value;
+          
           break;
       
         case "camara":
           stock.producto.marca = FormProduct.elements.namedItem("marca").value;
           stock.producto.lente = FormProduct.elements.namedItem("lente").value;
           stock.producto.memoria = FormProduct.elements.namedItem("memoria").value;
-        
-          break;
-      
-        default:
-  
+          
+          
           break;
       } 
-      
+      request.onsuccess = function(event){
+        db = event.target.result;
+
+        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops");
+        var requestTarget = almacenShops.get(target);
+
+        requestTarget.onsuccess = function(event){
+          var shop = requestTarget.result;
+          console.log(shop);
+          var i = shop.stock.findIndex(function(element){
+            return element.producto.sn == targetPro;
+          });
+          if(i != -1){
+            shop.stock[i].producto.nombre = nombre;
+            shop.stock[i].producto.descripcion = descripcion;
+            shop.stock[i].producto.iva = iva; 
+            shop.stock[i].producto.precio = precio;
+            shop.stock[i].producto.imagenes = imagenes;
+            shop.stock[i].producto.tProducto = tProduct;
+            shop.stock[i].cantidad = cantidad;
+            switch (shop.stock[i].producto.tProdcuto) {
+              case "Movil":
+              shop.stock[i].producto.marca = FormProduct.elements.namedItem("marca").value;
+              shop.stock[i].producto.camara = FormProduct.elements.namedItem("camara").value;
+              shop.stock[i].producto.memoria = FormProduct.elements.namedItem("marca").value;
+                break;
+            
+              case "Ordenador":
+              shop.stock[i].producto.marca = FormProduct.elements.namedItem("marca").value;
+              shop.stock[i].producto.cpu = FormProduct.elements.namedItem("cpu").value;
+              shop.stock[i].producto.memoria = FormProduct.elements.namedItem("marca").value;
+                break;
+            
+              case "VideoConsola":
+              shop.stock[i].producto.marca = FormProduct.elements.namedItem("marca").value;
+              shop.stock[i].producto.numJugadores = FormProduct.elements.namedItem("numJugadores").value;
+              shop.stock[i].producto.portatil = FormProduct.elements.namedItem("portatil").value;
+                break;
+            
+              case "Camara":
+              shop.stock[i].producto.marca = FormProduct.elements.namedItem("marca").value;
+              shop.stock[i].producto.lente = FormProduct.elements.namedItem("lente").value;
+              shop.stock[i].producto.memoria = FormProduct.elements.namedItem("marca").value;
+                break;
+  
+            }
+  
+            var requestMod = almacenShops.put(shop);
+            requestMod.onsuccess = function(event){
+              console.log("Producto modificado en el la tienda");
+            };
+  
+          }else{
+            console.log("No se encontro el producto en la tienda....");
+          }
+            
+          };
+      };
       WriteSuccessModal("Producto modificado","Se ha modificado un producto en la tienda " + shop.nombre);
       
     }
@@ -559,18 +750,49 @@ function checkRemoveProduct()
 {
   var target = FormProduct.elements.namedItem("RevIn").value;
   var targetPro = FormProduct.elements.namedItem("targetPro").value;
-  try {
+  var db;
+  var db_name = "ManchaStore";
+  var request = indexedDB.open(db_name,1);
+  //try {
     if(target == "store"){
+      request.onsuccess = function(event){
+        db = event.target.result;
+        var almacenStock = db.transaction(["stock"],"readwrite").objectStore("stock");
+        var requestTarget = almacenStock.delete(targetPro);
+        requestTarget.onsuccess = function(event){
+          console.log("Producto borrado del StoreHouse");
+        };
+      };
       Store.RemoveProduct(targetPro);
       WriteSuccessModal("Producto Eliminado!!","Se ha eliminado un producto de la tienda " + Store.nombre);
     }else{
+      request.onsuccess = function(event){
+        db = event.target.result;
+        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops")
+        var requestTarget = almacenShops.get(target);
+        requestTarget.onsuccess = function(event){
+          var shop = requestTarget.result;
+          var i = shop.stock.findIndex(function(element){
+            return element.producto.sn == targetPro;
+          });
+          if(i != -1){
+            shop.stock.splice(i,1);
+             var requestDel = almacenShops.put(shop);
+             requestDel.onsuccess = function(event){
+               console.log("Se ha eliminado un producto de una tienda");
+             };
+          }else{
+            console.log("No se encuentra el producto en la tienda...");
+          }
+        };
+      };
       var shop = Store.getShopByCif(target);
       shop.RemoveProduct(targetPro);
       WriteSuccessModal("Producto Eliminado!!","Se ha eliminado un producto de la tienda " + shop.nombre);
     }
-  } catch (e) {
-    WriteErrorModal(e.message);
-  }
+  //} catch (e) {
+  //  WriteErrorModal(e.message);
+  //}
 }
 
 

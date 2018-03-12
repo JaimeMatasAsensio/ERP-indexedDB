@@ -397,7 +397,7 @@ function GenerateInputSelectForProducts(proIte,nameInput,labeltext)
   var item = proIte.next();
   while(!item.done){
     var opt = document.createElement("option");
-    opt.setAttribute("value",item.value.producto.IdProduct);
+    opt.setAttribute("value",item.value.producto.SN);
     opt.appendChild(document.createTextNode(item.value.producto.nombre + " - " + item.value.producto.SN));
     inputSelect.appendChild(opt);
     item = proIte.next();

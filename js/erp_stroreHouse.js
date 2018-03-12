@@ -354,7 +354,7 @@ var StoreHouse = (function(){
       /*Metodo para remover un producto, requiere la Id del producto*/
       {
         var removPro = _stock.findIndex(function(element){
-          return (element.producto.IdProduct == proId);
+          return (element.producto.SN == proId);
         });
         if( removPro != -1){
           _stock.splice(removPro,1);
@@ -368,8 +368,9 @@ var StoreHouse = (function(){
       this.GetProductByID = function(proId)
       /*Metodo para obtener un producto, requiere la Id del producto*/
       {
+        
         var index = _stock.findIndex(function(element){
-          return (element.producto.IdProduct == proId);
+          return (element.producto.SN == proId);
         });
         
         if( index != -1){

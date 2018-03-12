@@ -1,5 +1,7 @@
 # ERP-indexedDB  
-  
+    
+## Version 0.0.3  
+Imp0lementacion de la modificacion de los productos de los almacenes mediante los formularios.  
 ## Version 0.0.2  
 Implementacion de la modificacion de las categorias de los almacenes mediante los formularios.  
 ## Version 0.0.1  

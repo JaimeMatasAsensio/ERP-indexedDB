@@ -243,7 +243,8 @@ function initDB(){
       almacenCategorias.add(categorias[i]);
     }
 
-    var almacenStock = db.createObjectStore("stock",{ autoIncrement : true });
+    var almacenStock = db.createObjectStore("stock",{keyPath: "producto.sn" });
+    
     for(var i in stock){
       almacenStock.add(stock[i]);
     }
