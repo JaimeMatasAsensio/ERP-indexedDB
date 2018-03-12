@@ -96,6 +96,8 @@ function checkAddCategory()
     var Id = IdCategory();
     var obj = new Category(Id,titulo, descripcion);
     var indObj = {IdCategory: Id ,titulo: titulo, descripcion: descripcion};
+
+    //variables de conexion a la indexedDB
     var db;
     var db_name = "ManchaStore";
     var request = indexedDB.open(db_name,1);
@@ -104,17 +106,17 @@ function checkAddCategory()
     if(addTo != "store"){
       Store.AddCategoryInShop(addTo,obj);
       var shop = Store.getShopByCif(addTo);
-      request.onsuccess = function(event){
+      request.onsuccess = function(event){//Si la conexion tuvo exito...
         db = event.target.result;
 
-        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");
-        var requestTarget = almacenShop.get(addTo);
+        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");//Iniciamos una transaccion sobre el alamcen shops en modo readwrite, recuperamos el almacen de objetos shops
+        var requestTarget = almacenShop.get(addTo);//Obtenemos la tienda a la que se añadira la nueva ccategoria
 
-        requestTarget.onsuccess = function(event){
+        requestTarget.onsuccess = function(event){//Si hubo exito...
           var shop = requestTarget.result;
-          shop.category.push(indObj);
+          shop.category.push(indObj);//Añadimos la nueva categoria en array de catagorias
 
-          var requestAdd = almacenShop.put(shop);
+          var requestAdd = almacenShop.put(shop);//Devolvemos la tienda modificada con la neuva categoria
           requestAdd.onsuccess = function(event){
             console.log("Nueva categoria añadida");
           }
@@ -123,10 +125,10 @@ function checkAddCategory()
         };
       WriteSuccessModal("Nueva Categoria Añadida!","La categoria "+titulo+"ha sido añadida a la tienda " + shop.nombre )
     }else{
-      request.onsuccess = function(event){
+      request.onsuccess = function(event){//Si la conexion tuvo exito...
       db = event.target.result;
-      var almacenCategorias = db.transaction(["categorias"],"readwrite").objectStore("categorias");
-      almacenCategorias.add(indObj);
+      var almacenCategorias = db.transaction(["categorias"],"readwrite").objectStore("categorias");//Iniciamos una transaccion sobre el amacen categorias en modo readwrite, recuperamos el alamacen de objetos categorias
+      almacenCategorias.add(indObj);//Añadimos la nueva categoria
       
       };
       Store.AddCategory(obj);
@@ -486,41 +488,44 @@ function checkRemoveCategory()
   var destino = FormCategory.elements.namedItem("removeTarget").value;
   var catTarget = FormCategory.elements.namedItem("idCategoria").value;
   var catTitleTarget = FormCategory.elements.namedItem("tituloCategoria").value;
+  //Variable de conexion a la indexedDB
   var db;
   var db_name = "ManchaStore";
   var request = indexedDB.open(db_name,1);
   try {
     if(destino == "store"){
-      request.onsuccess = function(event){
-        db = event.target.result;
-        var requestDeleteOnStoreHouse = db.transaction(["categorias"],"readwrite").objectStore("categorias").delete(Number(catTarget));
+      request.onsuccess = function(event){//Si la conexion tuvo exito
+        db = event.target.result;//Obtenemos la indexedDB
+        var requestDeleteOnStoreHouse = db.transaction(["categorias"],"readwrite")
+        .objectStore("categorias")
+        .delete(Number(catTarget));//Iniciamos una transaccion sobre el almacen category en modo readwrite, Obtenemos el almacen de objetos categoria y eliminamos la categoria seleccionada
 
-        requestDeleteOnStoreHouse.onsuccess = function(event){
+        requestDeleteOnStoreHouse.onsuccess = function(event){// si al eliminar tuvo exito...
           console.log("Categoria eliminada del storeHouse...");
         }
 
-        var requestDeleteOnShops = db.transaction(["shops"],"readwrite").objectStore("shops");
-        requestDeleteOnShops.openCursor().onsuccess = function(event){
-          var cursor = event.target.result;
-          if(cursor){
-            var shop = cursor.value;
-            var index = shop.category.findIndex(function(element){
+        var requestDeleteOnShops = db.transaction(["shops"],"readwrite").objectStore("shops");//Iniamos una transaccion sobre el almacen shops en modo readwrite, Obtenemos el el almacen de objetos shops
+        requestDeleteOnShops.openCursor().onsuccess = function(event){//Abrimos un cursor y si esta accion tuvo exito...
+          var cursor = event.target.result;//Obtenemos el cursor
+          if(cursor){//Si hay valores en el cursor
+            var shop = cursor.value;//Obtenemos una tienda
+            var index = shop.category.findIndex(function(element){//Buscamos la categoria a eleiminar dentro de su array de categorias
               return element.IdCategory == Number(catTarget);
             });
             if(index != -1){
-              shop.category.splice(index,1);
+              shop.category.splice(index,1);//Eliminamos la categoria de su array de categorias
             }
             shop.stock.forEach(function(element){
-              if(element.IdCategory == Number(catTarget)) element.IdCategory = 0;
+              if(element.IdCategory == Number(catTarget)) element.IdCategory = 0;//Sustituimos la categoria de los productos por la categoria general
             });
-            requestDeleteOnShops.put(shop);
+            requestDeleteOnShops.put(shop);//Devolvemos la tienda modificada a la que hemos eliminado su categoria y sustituido la categoria eliminada por la categoria general
+            cursor.continue();
           }else{
             console.log("categoria eliminada de las tiendas...")
           }
         }
 
       };
-
 
       var removed = Store.setCategoryProduct(catTarget,0);
       while(removed == true){
@@ -542,22 +547,23 @@ function checkRemoveCategory()
     }else{
 
       request.onsuccess = function (event){
+        //Variables de conexion ala indexed DB
         db = event.target.result;
         var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");
         var requestDeleteOnShop = almacenShop.get(destino);
 
-        requestDeleteOnShop.onsuccess = function(event){
-          var shop = requestDeleteOnShop.result;
-          var index = shop.category.findIndex(function(element){
+        requestDeleteOnShop.onsuccess = function(event){//Si la conexion tuvo exito....
+          var shop = requestDeleteOnShop.result;//Obtenemos la tienda que contiene la categoria que queremos eliminar
+          var index = shop.category.findIndex(function(element){//Buscamos la categoria en su array de categorias
             return element.IdCategory == Number(catTarget);
           });
           if(index != -1){
-            shop.category.splice(index,1);
+            shop.category.splice(index,1);//Eliminamos la categoria
           }
           shop.stock.forEach(function(element){
-            if(element.IdCategory == Number(catTarget)) element.IdCategory = 0;
+            if(element.IdCategory == Number(catTarget)) element.IdCategory = 0;//Sustituimos la categoria eliminada de los productos por la categoria general
           });
-          almacenShop.put(shop);
+          almacenShop.put(shop);//Devolvemos la tienda modificada con la categoria eliminada 
 
           var requestAdd = almacenShop.put(shop);
           requestAdd.onsuccess = function(event){
@@ -566,8 +572,6 @@ function checkRemoveCategory()
 
         }
     };
-
-
       var removeShop = Store.setCategoryProductInShop(destino,catTarget,0);
       while(removeShop == true){
         removeShop = Store.setCategoryProductInShop(destino,catTarget,0);
@@ -591,6 +595,7 @@ function checkModCategory()
   var catTarget = FormCategory.elements.namedItem("idCategoria").value;
   var modTitulo = FormCategory.elements.namedItem("tituloCategoria").value;
   var modDesc = FormCategory.elements.namedItem("descrCategoria").value;
+  //Variables de conexion a la indexedDB
   var db;
   var db_name = "ManchaStore";
   var request = indexedDB.open(db_name,1);
@@ -601,21 +606,22 @@ function checkModCategory()
       var oldCat = Store.getCategoryFromShop(destino,catTarget);
       var shop = Store.getShopByCif(destino);
 
-      request.onsuccess = function (event){
+      request.onsuccess = function (event){//Sila conexion tuvo exito...
         db = event.target.result;
-        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");
-        var requestTarget = almacenShop.get(destino);
+        var almacenShop = db.transaction(["shops"],"readwrite").objectStore("shops");//Iniciamos una transaccion sobre el alamacen de shops en modo readwrite, recuperamos el almacen de objetos shops
+        var requestTarget = almacenShop.get(destino);//Obtenemos la tienda en la que se modificara la categoria
 
-        requestTarget.onsuccess = function(event){
+        requestTarget.onsuccess = function(event){//Si tenemos exito....
           var shop = requestTarget.result;
-          var index = shop.category.findIndex(function(element){
+          var index = shop.category.findIndex(function(element){//Buscamos la categoria dentro de la teinda
             return element.IdCategory == Number(catTarget);
           });
           if(index != -1){
+            //Modificamos los valores de la categoria
             shop.category[index].Idcategory = Number(catTarget);
             shop.category[index].titulo = modTitulo;
             shop.category[index].descripcion = modDesc;
-            var requestAdd = almacenShop.put(shop);
+            var requestAdd = almacenShop.put(shop);//Devolvemos la tienda modificada con su categoria actualizada.
             requestAdd.onsuccess = function(event){
               console.log("Categoria modificada añadida en tienda!");
             }
@@ -632,17 +638,18 @@ function checkModCategory()
     }else{
       var oldCat = Store.getCategory(catTarget);
 
-      request.onsuccess = function(event){
+      request.onsuccess = function(event){//Si al conexion tuvo exito...
         db = event.target.result;
-        var almacenCategorias = db.transaction(["categorias"],"readwrite").objectStore("categorias");
-        var requestTarget = almacenCategorias.get(Number(catTarget));
+        var almacenCategorias = db.transaction(["categorias"],"readwrite").objectStore("categorias");//Iniciamos una transaccion sobre el almacen categorias en modo readwrite y recuperamos el almacen de objetos category
+        var requestTarget = almacenCategorias.get(Number(catTarget));//Obtenemos la categoria a modificar
 
-        requestTarget.onsuccess = function(event){
+        requestTarget.onsuccess = function(event){//Si hubo exito en la obtencion....
+          //Modificamos los valores de la categoria...
           var modCat = requestTarget.result;
           modCat.IdCategory = Number(catTarget);
           modCat.titulo = modTitulo;
           modCat.descripcion = modDesc;
-          var requestMod = almacenCategorias.put(modCat);
+          var requestMod = almacenCategorias.put(modCat);//Devolvemos la cateoria al alamcen de objetos
 
           requestMod.onsuccess = function(event){
             console.log("Categoria modificada en StoreHouse!");

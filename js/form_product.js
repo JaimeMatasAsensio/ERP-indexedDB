@@ -363,7 +363,9 @@ function generateFormModifyProd(field)
 }
 
 function checkAddProduct()
-/*Funcion que añade un producto nuevo en una tienda o en el store house*/
+/*Funcion que añade un producto nuevo en una tienda o en el store house
+  Tambien añade un produto a la as tiendas o al storehouse en la indexedDB
+*/
 {
   var sn = FormProduct.elements.namedItem("SN").value;
   var nombre = FormProduct.elements.namedItem("nombre").value;
@@ -373,12 +375,9 @@ function checkAddProduct()
   var precio = FormProduct.elements.namedItem("precio").value;
   precio = Number(precio);
   var imgPath = FormProduct.elements.namedItem("img").value;
-
   var producto = null;
-
   var tProduct = FormProduct.elements.namedItem("tProduct").value;
-
-  var indObj = {};
+  var indObj = {}; // Inicializacion del objeto literal que se añadira en la tienda o el storeHouse
 
   try {
     switch (tProduct) {
@@ -396,7 +395,7 @@ function checkAddProduct()
           camara: FormProduct.elements.namedItem("camara").value,
           memoria: FormProduct.elements.namedItem("memoria").value,
           tProducto: "Movil"
-        }
+        } // Valores para un producto de tipo movil
         break;
     
       case "ordenador":
@@ -412,7 +411,7 @@ function checkAddProduct()
           cpu: FormProduct.elements.namedItem("cpu").value,
           memoria: FormProduct.elements.namedItem("memoria").value,
           tProducto: "Ordenador"
-        }
+        }//Valores para un producto de tipo Ordenador
         break;
     
       case "consola":
@@ -428,7 +427,7 @@ function checkAddProduct()
           camara: FormProduct.elements.namedItem("numJugadores").value,
           memoria: FormProduct.elements.namedItem("portatil").value,
           tProducto: "VideoConsola"
-        }
+        }// Valores para un producto de tipo Video consola
         break;
     
       case "camara":
@@ -444,29 +443,25 @@ function checkAddProduct()
           camara: FormProduct.elements.namedItem("lente").value,
           memoria: FormProduct.elements.namedItem("memoria").value,
           tProducto: "Camara"
-        }
+        }//valores para un producto de tipo camara
         break;
     }
 
-    
     var categoria = FormProduct.elements.namedItem("categoriaPro").value;
-
     var cantidad = FormProduct.elements.namedItem("cantidad").value;
     cantidad = Number(cantidad);
-
     var target = FormProduct.elements.namedItem("addTo").value;
 
     if(target == "store"){
 
-      var db;
-      var db_name = "ManchaStore";
-      var request = indexedDB.open(db_name,1);
+      var db;//Inicializacion de la variable para la base de datos
+      var db_name = "ManchaStore";//Nombre de la base de datos
+      var request = indexedDB.open(db_name,1);//Conexion a la indexedDB
 
-      request.onsuccess = function(event){
-        db = event.target.result;
-
-        var stockStore = db.transaction(["stock"], "readwrite").objectStore("stock");
-        stockStore.add({
+      request.onsuccess = function(event){ // Si la conexion tuvo exito...
+        db = event.target.result;//Obtenemos la indexedDB
+        var stockStore = db.transaction(["stock"], "readwrite").objectStore("stock");//Iniciamos una transaccion sobre el almacen stock en readwrite, obtenemos el almacen de objetos
+        stockStore.add({//Añadimos el producto al almacen stock
           producto: indObj,
           cantidad: cantidad,
           IdCategory: Number(categoria) 
@@ -477,25 +472,24 @@ function checkAddProduct()
       Store.AddProduct(producto,cantidad,categoria);
       WriteSuccessModal("Nuevo Producto añadido","Se ha añadido un nuevo producto a " + Store.nombre);
     }else{
-      var db;
-      var db_name = "ManchaStore";
-      var request = indexedDB.open(db_name,1);
+      var db; // Inicializacion de la variable para contener la indexedDB
+      var db_name = "ManchaStore";// Nombre de la indexed db
+      var request = indexedDB.open(db_name,1);//Conexion a la indexedDB
 
-      request.onsuccess = function(event){
-        db = event.target.result;
+      request.onsuccess = function(event){//Si la conexion tuvo exito...
+        db = event.target.result;//Almacenamos la indexedDb
+        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops");//Iniciamos una transaccion sobre el almacen shops en readwrite, obtenemos el almacen de objetos
+        var requestTarget = almacenShops.get(target);//Obtenemos la tienda a la que añadir el nuevo producto
 
-        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops");
-        var requestTarget = almacenShops.get(target);
-
-        requestTarget.onsuccess = function (event){
-          var shop = requestTarget.result;
-          shop.stock.push({
+        requestTarget.onsuccess = function (event){// si obtenemos la tienda de forma correcta...
+          var shop = requestTarget.result;//Obtenemos la tienda
+          shop.stock.push({//añadimos el producto sobre el array de su stock
             producto: indObj,
             cantidad: cantidad,
             IdCategory: Number(categoria)
           })
 
-          var requestAdd = almacenShops.put(shop);
+          var requestAdd = almacenShops.put(shop);//Añadimos la tienda modificada con el nuevo producto
           requestAdd.onsuccess = function (event){
             console.log("Nuevo Producto añadido a tienda");
           };
@@ -545,7 +539,7 @@ function checkModProduct()
       stock.producto.imagenes = imagenes;
       stock.cantidad = cantidad;
       var indObj = {};
-
+      //Variables de conexion a la base de datos
       var db;
       var db_name = "ManchaStore";
       var request = indexedDB.open(db_name,1);
@@ -579,15 +573,15 @@ function checkModProduct()
           stock.producto.memoria = FormProduct.elements.namedItem("memoria").value;
           break;
       }    
-      request.onsuccess = function(event){
-        db = event.target.result;
+      request.onsuccess = function(event){//Si la conexion tuvo exito...
+        db = event.target.result;//Obtenemos la indexedDB
 
-        var almacenStock = db.transaction(["stock"],"readwrite").objectStore("stock");
-        var requestTarget = almacenStock.get(targetPro);
+        var almacenStock = db.transaction(["stock"],"readwrite").objectStore("stock");//Iniciamos una transaccion sobre el almacen stock en modo readwrite, obtenemos el almacen de objetos
+        var requestTarget = almacenStock.get(targetPro);//Obtenemos el producto a modificar
 
-        requestTarget.onsuccess = function(event){
-          var prod = requestTarget.result;
-          console.log(prod)
+        requestTarget.onsuccess = function(event){//Si la obtencion tuvo exito...
+          var prod = requestTarget.result;//Obtenemos el objeto literal
+          //Modificamos los valores del producto...
           prod.producto.nombre = nombre;
           prod.producto.descripcion = descripcion;
           prod.producto.iva = iva; 
@@ -595,7 +589,7 @@ function checkModProduct()
           prod.producto.imagenes = imagenes;
           prod.producto.tProducto = tProduct;
           prod.cantidad = cantidad;
-          switch (prod.producto.tProdcuto) {
+          switch (prod.producto.tProdcuto) {//Segun el tipo de producto se modifican unas propiedades u otras
             case "Movil":
               prod.producto.marca = FormProduct.elements.namedItem("marca").value;
               prod.producto.camara = FormProduct.elements.namedItem("camara").value;
@@ -622,7 +616,7 @@ function checkModProduct()
 
           }
 
-          var requestMod = almacenStock.put(prod);
+          var requestMod = almacenStock.put(prod);//Añadimos el producto modificado al amacen de objetos
           requestMod.onsuccess = function(event){
             console.log("Producto modificado en el StoreHouse");
           };
@@ -642,6 +636,7 @@ function checkModProduct()
       stock.producto.precio = precio;
       stock.producto.imagenes = imagenes;
       stock.cantidad = cantidad;
+      //Variables de conexion a la indexedDB
       var db;
       var db_name = "ManchaStore";
       var request = indexedDB.open(db_name,1);
@@ -676,19 +671,19 @@ function checkModProduct()
           
           break;
       } 
-      request.onsuccess = function(event){
-        db = event.target.result;
+      request.onsuccess = function(event){//Si la conexion tuvo exito...
+        db = event.target.result;//Obtenemos la base de datos
 
-        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops");
-        var requestTarget = almacenShops.get(target);
+        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops");//Iniciamos una transaccion sobre el almacen shops en modo readwrite, obtenemos el almacen de objetos shops
+        var requestTarget = almacenShops.get(target);//Obtenemos el objeto tienda que contiene el producto a modificar
 
-        requestTarget.onsuccess = function(event){
-          var shop = requestTarget.result;
-          console.log(shop);
-          var i = shop.stock.findIndex(function(element){
+        requestTarget.onsuccess = function(event){//Si la obtencio tuvo exito...
+          var shop = requestTarget.result;//Obtenemos el objeto tienda
+          var i = shop.stock.findIndex(function(element){//Buscamos el producto a modificar por su numero de serie (propiedad SN)
             return element.producto.sn == targetPro;
           });
           if(i != -1){
+            //Modificamos sus propiedades en el array de stock de la tienda
             shop.stock[i].producto.nombre = nombre;
             shop.stock[i].producto.descripcion = descripcion;
             shop.stock[i].producto.iva = iva; 
@@ -696,7 +691,7 @@ function checkModProduct()
             shop.stock[i].producto.imagenes = imagenes;
             shop.stock[i].producto.tProducto = tProduct;
             shop.stock[i].cantidad = cantidad;
-            switch (shop.stock[i].producto.tProdcuto) {
+            switch (shop.stock[i].producto.tProdcuto) {//Segun el tipo de producto modificamos unas propiedades u otras
               case "Movil":
               shop.stock[i].producto.marca = FormProduct.elements.namedItem("marca").value;
               shop.stock[i].producto.camara = FormProduct.elements.namedItem("camara").value;
@@ -723,7 +718,7 @@ function checkModProduct()
   
             }
   
-            var requestMod = almacenShops.put(shop);
+            var requestMod = almacenShops.put(shop);//Añadimos la tienda modificada con el producto ya modificado
             requestMod.onsuccess = function(event){
               console.log("Producto modificado en el la tienda");
             };
@@ -750,15 +745,16 @@ function checkRemoveProduct()
 {
   var target = FormProduct.elements.namedItem("RevIn").value;
   var targetPro = FormProduct.elements.namedItem("targetPro").value;
+  //Variables de conexion a la indexedDB
   var db;
   var db_name = "ManchaStore";
   var request = indexedDB.open(db_name,1);
-  //try {
+  try {
     if(target == "store"){
-      request.onsuccess = function(event){
-        db = event.target.result;
-        var almacenStock = db.transaction(["stock"],"readwrite").objectStore("stock");
-        var requestTarget = almacenStock.delete(targetPro);
+      request.onsuccess = function(event){//Si la conexion tuvo exito....
+        db = event.target.result;//Obtenemos la indexedDB
+        var almacenStock = db.transaction(["stock"],"readwrite").objectStore("stock");//Iniciamos una transaccion sobre el alamcen stock en modo readwrite, obtenemos el alamcen de objetos stock
+        var requestTarget = almacenStock.delete(targetPro);//Elimiamos el producto del almacen
         requestTarget.onsuccess = function(event){
           console.log("Producto borrado del StoreHouse");
         };
@@ -766,18 +762,18 @@ function checkRemoveProduct()
       Store.RemoveProduct(targetPro);
       WriteSuccessModal("Producto Eliminado!!","Se ha eliminado un producto de la tienda " + Store.nombre);
     }else{
-      request.onsuccess = function(event){
-        db = event.target.result;
-        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops")
-        var requestTarget = almacenShops.get(target);
-        requestTarget.onsuccess = function(event){
-          var shop = requestTarget.result;
-          var i = shop.stock.findIndex(function(element){
+      request.onsuccess = function(event){//Si la conexion tuvo exito....
+        db = event.target.result;//Otenemos la indexedDB
+        var almacenShops = db.transaction(["shops"],"readwrite").objectStore("shops")//Iniciamos una transaccion sobre el almacen shops en modo read write, obtenemos el alamacen de objetos shops
+        var requestTarget = almacenShops.get(target);//Otenemos la tienda de donde se eliminara el producto
+        requestTarget.onsuccess = function(event){// si la obtencion tuvo exito...
+          var shop = requestTarget.result;//Guardamos el objeto tienda
+          var i = shop.stock.findIndex(function(element){//Buscamos el producto dentro del array stock de la tienda
             return element.producto.sn == targetPro;
           });
           if(i != -1){
-            shop.stock.splice(i,1);
-             var requestDel = almacenShops.put(shop);
+            shop.stock.splice(i,1);//Eliminamos el producto del array
+             var requestDel = almacenShops.put(shop);//Devolvemos la tienda modificada con el producto eliminado
              requestDel.onsuccess = function(event){
                console.log("Se ha eliminado un producto de una tienda");
              };
@@ -790,9 +786,9 @@ function checkRemoveProduct()
       shop.RemoveProduct(targetPro);
       WriteSuccessModal("Producto Eliminado!!","Se ha eliminado un producto de la tienda " + shop.nombre);
     }
-  //} catch (e) {
-  //  WriteErrorModal(e.message);
-  //}
+  } catch (e) {
+    WriteErrorModal(e.message);
+  }
 }
 
 
